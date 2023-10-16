@@ -5,21 +5,19 @@ fn main() {
 struct Lychrel;
 
 impl Lychrel {
-    fn converges_at_iteration(n: i32, _limit: i32) -> i32 {
-        if !Lychrel::is_palindrome(n) {
-            let r = Lychrel::reverse(n);
-            let sum = r + n;
-            if Lychrel::is_palindrome(sum) {
-                1
-            } else {
-                2
-            }
+    fn converges_at_iteration(n: i32, limit: i32) -> i32 {
+        Lychrel::converge(n.into(), 0, limit)
+    }
+
+    fn converge(n: i64, mut iteration: i32, limit: i32) -> i32 {
+        if (!Lychrel::is_palindrome(n) && iteration < limit) {
+            Lychrel::converge(n + Lychrel::reverse(n), iteration + 1, limit)
         } else {
-            0
+            iteration
         }
     }
 
-    fn is_palindrome(n: i32) -> bool {
+    fn is_palindrome(n: i64) -> bool {
         let digits = n.to_string();
         let mut digits_iter = digits.chars();
         let mut digits_reverse_iter = digits.chars().rev();
@@ -29,10 +27,12 @@ impl Lychrel {
                 return false;
             }
         }
-       true
+        true
     }
 
-    fn reverse(n: i32) -> i32 {
+    fn reverse(n: i64) -> i64 {
+        n.to_string().chars().rev().collect::<String>().parse().unwrap()
+        /*
         let mut n = n;
         let mut r = 0;
 
@@ -42,9 +42,12 @@ impl Lychrel {
             r = r * 10 + d;
         }
         r
+        */
     }
 
 }
+
+
 
 
 #[cfg(test)]
@@ -52,7 +55,7 @@ mod tests {
 
     use super::*;
 
-    const LIMIT:i32 =1000;
+    const LIMIT:i32 =30;
 
     struct TestContext {
         limit: i32,
@@ -73,10 +76,17 @@ mod tests {
         converges_at_iteration(11, 0);
         converges_at_iteration(19, 2);
         converges_at_iteration(78, 4);
+        converges_at_iteration(89, 24);
+
+        does_not_converge(196);
     }
 
     fn converges_at_iteration(n: i32, iteration: i32) {
         assert_eq!(iteration, Lychrel::converges_at_iteration(n, LIMIT));
+    }
+
+    fn does_not_converge(n: i32) {
+        Lychrel::converges_at_iteration(n, LIMIT);
     }
 
     #[test]
@@ -88,7 +98,7 @@ mod tests {
         is_palindrome(1234321);
     }
 
-    fn is_palindrome(n: i32) {
+    fn is_palindrome(n: i64) {
         assert!(Lychrel::is_palindrome(n));
     }
 
@@ -99,7 +109,7 @@ mod tests {
         is_not_palindrome(1243321);
     }
 
-    fn is_not_palindrome(n: i32) {
+    fn is_not_palindrome(n: i64) {
         assert!(!Lychrel::is_palindrome(n));
     }
 
@@ -111,7 +121,7 @@ mod tests {
         reversed(1234, 4321);
     }
 
-    fn reversed(n: i32, r: i32) {
+    fn reversed(n: i64, r: i64) {
         assert_eq!(r, Lychrel::reverse(n));
     }
     
