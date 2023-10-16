@@ -1,3 +1,5 @@
+use num_bigint::BigUint;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -5,24 +7,26 @@ fn main() {
 struct Lychrel;
 
 impl Lychrel {
-    fn converges_at_iteration(n: i32, limit: i32) -> i32 {
-        Lychrel::converge(n.into(), 0, limit)
+    fn converges_at_iteration(n: u32, limit: u32) -> u32 {
+        let n = BigUint::from(n);
+        Lychrel::converge(&n, 0, limit)
     }
 
-    fn converge(n: i64, mut iteration: i32, limit: i32) -> i32 {
-        if (!Lychrel::is_palindrome(n) && iteration < limit) {
-            Lychrel::converge(n + Lychrel::reverse(n), iteration + 1, limit)
+    fn converge(n: &BigUint, mut iteration: u32, limit: u32) -> u32 {
+        if !Lychrel::is_palindrome(&n) && iteration < limit {
+            let rev = Lychrel::reverse(&n);
+            Lychrel::converge(&(n + rev), iteration + 1, limit)
         } else {
             iteration
         }
     }
 
-    fn is_palindrome(n: i64) -> bool {
-        let digits = n.to_string();
-        let mut digits_iter = digits.chars();
-        let mut digits_reverse_iter = digits.chars().rev();
+    fn is_palindrome(n: &BigUint) -> bool {
+        let s = n.to_string();
+        let mut digits_iter = s.chars();
+        let mut digits_reverse_iter = s.chars().rev();
 
-        for i in 0..(digits.len() / 2) {
+        for i in 0..(s.len() / 2) {
             if digits_iter.next() != digits_reverse_iter.next() {
                 return false;
             }
@@ -30,19 +34,15 @@ impl Lychrel {
         true
     }
 
-    fn reverse(n: i64) -> i64 {
-        n.to_string().chars().rev().collect::<String>().parse().unwrap()
-        /*
-        let mut n = n;
-        let mut r = 0;
-
-        while n != 0 {
-            let d = n % 10;
-            n = n /10;
-            r = r * 10 + d;
-        }
-        r
-        */
+    fn reverse(n: &BigUint) -> BigUint {           
+        match n.to_string()
+            .chars()
+            .rev()
+            .collect::<String>()
+            .parse::<BigUint>() {
+                Ok(r) => r,
+                Err(_) => panic!("BigUint conversion error")
+            }
     }
 
 }
@@ -55,10 +55,10 @@ mod tests {
 
     use super::*;
 
-    const LIMIT:i32 =30;
+    const LIMIT:u32 =30;
 
     struct TestContext {
-        limit: i32,
+        limit: u32,
     }
 
     fn init_test_context() -> TestContext {
@@ -81,11 +81,11 @@ mod tests {
         does_not_converge(196);
     }
 
-    fn converges_at_iteration(n: i32, iteration: i32) {
+    fn converges_at_iteration(n: u32, iteration: u32) {
         assert_eq!(iteration, Lychrel::converges_at_iteration(n, LIMIT));
     }
 
-    fn does_not_converge(n: i32) {
+    fn does_not_converge(n: u32) {
         Lychrel::converges_at_iteration(n, LIMIT);
     }
 
@@ -98,8 +98,9 @@ mod tests {
         is_palindrome(1234321);
     }
 
-    fn is_palindrome(n: i64) {
-        assert!(Lychrel::is_palindrome(n));
+    fn is_palindrome(n: u32) {
+        let n = BigUint::from(n);
+        assert!(Lychrel::is_palindrome(&n));
     }
 
     #[test]
@@ -109,8 +110,9 @@ mod tests {
         is_not_palindrome(1243321);
     }
 
-    fn is_not_palindrome(n: i64) {
-        assert!(!Lychrel::is_palindrome(n));
+    fn is_not_palindrome(n: u32) {
+        let n = BigUint::from(n);
+        assert!(!Lychrel::is_palindrome(&n));
     }
 
     #[test]
@@ -121,8 +123,9 @@ mod tests {
         reversed(1234, 4321);
     }
 
-    fn reversed(n: i64, r: i64) {
-        assert_eq!(r, Lychrel::reverse(n));
+    fn reversed(n: u32, r: u32) {
+        let n = BigUint::from(n);
+        assert_eq!(BigUint::from(r), Lychrel::reverse(&n));
     }
     
 
