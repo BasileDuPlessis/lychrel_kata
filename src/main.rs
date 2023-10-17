@@ -41,7 +41,7 @@ impl Lychrel {
             .collect::<String>()
             .parse::<BigUint>() {
                 Ok(r) => r,
-                Err(_) => panic!("BigUint conversion error")
+                Err(_) => panic!("Conversion error")
             }
     }
 
@@ -55,21 +55,10 @@ mod tests {
 
     use super::*;
 
-    const LIMIT:u32 =30;
-
-    struct TestContext {
-        limit: u32,
-    }
-
-    fn init_test_context() -> TestContext {
-        TestContext {
-            limit: 1000,
-        }
-    }
+    const LIMIT:u32 =1000;
 
     #[test]
     fn facts() {
-        let test_context = init_test_context();
         converges_at_iteration(1, 0);
         converges_at_iteration(2, 0);
         converges_at_iteration(10, 1);
@@ -77,6 +66,7 @@ mod tests {
         converges_at_iteration(19, 2);
         converges_at_iteration(78, 4);
         converges_at_iteration(89, 24);
+        converges_at_iteration(187, 23);
 
         does_not_converge(196);
     }
@@ -86,7 +76,7 @@ mod tests {
     }
 
     fn does_not_converge(n: u32) {
-        Lychrel::converges_at_iteration(n, LIMIT);
+        assert_eq!(LIMIT, Lychrel::converges_at_iteration(n, LIMIT));
     }
 
     #[test]
